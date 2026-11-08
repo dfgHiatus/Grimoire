@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Grimoire.ViewModels"
+             xmlns:l="using:Grimoire.Services"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="800"
+             x:Class="Grimoire.Views.MainView"
+             x:DataType="vm:MainViewModel"
+             Background="{DynamicResource AppBackgroundBrush}">
+
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding BackCommand}" />
+    </UserControl.KeyBindings>
+
+    <Grid>
+        <!-- Onboarding -->
+        <ContentControl Content="{Binding Login}" IsVisible="{Binding !IsSignedIn}" />
+
+        <!-- Signed-in shell: page + bottom navigation -->
+        <Grid RowDefinitions="*,Auto" IsVisible="{Binding IsSignedIn}">
+            <ContentControl Content="{Binding CurrentPage}" />
+
+            <Border Grid.Row="1"
+                    Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource OutlineBrush}"
+                    BorderThickness="0,1,0,0">
+                <Grid ColumnDefinitions="*,*,*" MaxWidth="560">
+                    <Button Grid.Column="0" Classes="nav" Classes.selected="{Binding IsLibraryTab}"
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppTab.Library}"
+                            AutomationProperties.Name="{l:Tr Nav_Library}">
+                        <StackPanel Spacing="4">
+                            <Border Classes="pill" CornerRadius="14" BorderThickness="1" Padding="18,4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource IconLibrary}" Width="20" Height="20" />
+                            </Border>
+                            <TextBlock Text="{l:Tr Nav_Library}" FontSize="12" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" Classes="nav" Classes.selected="{Binding IsSettingsTab}"
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppTab.Settings}"
+                            AutomationProperties.Name="{l:Tr Nav_Settings}">
+                        <StackPanel Spacing="4">
+                            <Border Classes="pill" CornerRadius="14" BorderThickness="1" Padding="18,4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource IconSettings}" Width="20" Height="20" />
+                            </Border>
+                            <TextBlock Text="{l:Tr Nav_Settings}" FontSize="12" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2" Classes="nav" Classes.selected="{Binding IsAboutTab}"
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppTab.About}"
+                            AutomationProperties.Name="{l:Tr Nav_About}">
+                        <StackPanel Spacing="4">
+                            <Border Classes="pill" CornerRadius="14" BorderThickness="1" Padding="18,4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource IconInfo}" Width="20" Height="20" />
+                            </Border>
+                            <TextBlock Text="{l:Tr Nav_About}" FontSize="12" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Full-screen item view -->
+        <ContentControl Content="{Binding Detail}" IsVisible="{Binding HasDetail}" />
+    </Grid>
+</UserControl>

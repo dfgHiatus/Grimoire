@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Grimoire.ViewModels"
+             xmlns:l="using:Grimoire.Services"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="800"
+             x:Class="Grimoire.Views.AboutView"
+             x:DataType="vm:AboutViewModel">
+    <ScrollViewer>
+        <StackPanel MaxWidth="640" Margin="16,24,16,32" Spacing="16">
+
+            <!-- Identity -->
+            <StackPanel Orientation="Horizontal" Spacing="14">
+                <Border Width="56" Height="56" CornerRadius="8"
+                        Background="{StaticResource AccentBrush}"
+                        BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1">
+                    <PathIcon Data="{StaticResource IconBook}" Width="28" Height="28" Foreground="{StaticResource OnAccentBrush}" />
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Classes="h1" Text="Grimoire" />
+                    <TextBlock Classes="muted" Text="{Binding VersionText}" />
+                </StackPanel>
+            </StackPanel>
+            <TextBlock Text="{l:Tr About_Tagline}" TextWrapping="Wrap" />
+
+            <!-- Project link -->
+            <Border Classes="section">
+                <StackPanel Spacing="2">
+                    <HyperlinkButton Padding="0" NavigateUri="{Binding ProjectUrl}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{l:Tr About_Project}" FontWeight="SemiBold" />
+                            <PathIcon Data="{StaticResource IconOpen}" Width="14" Height="14" />
+                        </StackPanel>
+                    </HyperlinkButton>
+                    <TextBlock Classes="muted" FontSize="12" Text="{Binding ProjectUrlText}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+
+            <!-- Licenses link -->
+            <Border Classes="section">
+                <HyperlinkButton Padding="0" NavigateUri="{Binding LicensesUrl}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{l:Tr About_Licenses}" FontWeight="SemiBold" />
+                        <PathIcon Data="{StaticResource IconOpen}" Width="14" Height="14" />
+                    </StackPanel>
+                </HyperlinkButton>
+            </Border>
+
+            <!-- Contributors, most contributions first -->
+            <Border Classes="section">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="h2" Text="{l:Tr About_Contributors}" />
+
+                    <StackPanel IsVisible="{Binding IsLoading}" Spacing="6">
+                        <ProgressBar IsIndeterminate="True" />
+                        <TextBlock Classes="muted" Text="{l:Tr About_ContributorsLoading}" />
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding HasError}" Spacing="8">
+                        <TextBlock Classes="error" Text="{l:Tr About_ContributorsError}" />
+                        <Button Classes="outline" Command="{Binding LoadContributorsCommand}" Content="{l:Tr Lib_Retry}" />
+                    </StackPanel>
+
+                    <ItemsControl ItemsSource="{Binding Contributors}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ContributorViewModel">
+                                <Grid ColumnDefinitions="32,Auto,*,Auto" Margin="0,6">
+                                    <TextBlock Classes="muted" Text="{Binding Rank, StringFormat='#{0}'}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Width="36" Height="36" CornerRadius="18" ClipToBounds="True" Margin="0,0,10,0"
+                                            Background="{StaticResource AccentBrush}"
+                                            BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1">
+                                        <Panel>
+                                            <TextBlock Text="{Binding Initial}" FontWeight="Bold" Foreground="{StaticResource OnAccentBrush}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <Image Source="{Binding Avatar}" Stretch="UniformToFill" />
+                                        </Panel>
+                                    </Border>
+                                    <HyperlinkButton Grid.Column="2" Padding="0" VerticalAlignment="Center"
+                                                     NavigateUri="{Binding ProfileUrl}" Content="{Binding Login}" />
+                                    <TextBlock Grid.Column="3" Classes="muted" FontSize="13" VerticalAlignment="Center"
+                                               Text="{Binding ContributionsText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{l:Tr About_Disclaimer}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

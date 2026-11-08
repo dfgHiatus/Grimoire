@@ -1,0 +1,170 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Grimoire.ViewModels"
+             xmlns:l="using:Grimoire.Services"
+             xmlns:c="using:Grimoire.Controls"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="800"
+             x:Class="Grimoire.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Search + options -->
+        <Border Background="{DynamicResource AppBackgroundBrush}" Padding="16,16,16,12">
+            <Grid ColumnDefinitions="*,Auto" MaxWidth="1200">
+                <TextBox Text="{Binding SearchText}"
+                         PlaceholderText="{l:Tr Lib_SearchPlaceholder}"
+                         AutomationProperties.Name="{l:Tr Lib_SearchPlaceholder}"
+                         Classes="clearButton"
+                         BorderBrush="{DynamicResource OutlineBrush}"
+                         CornerRadius="4" Padding="6,10" VerticalContentAlignment="Center">
+                    <TextBox.InnerLeftContent>
+                        <PathIcon Data="{StaticResource IconSearch}" Width="16" Height="16" Margin="12,0,2,0"
+                                  Foreground="{DynamicResource MutedTextBrush}" />
+                    </TextBox.InnerLeftContent>
+                </TextBox>
+
+                <Button Grid.Column="1" Classes="outline" Margin="8,0,0,0" Padding="12" VerticalAlignment="Stretch"
+                        ToolTip.Tip="{l:Tr Lib_Filters}" AutomationProperties.Name="{l:Tr Lib_Filters}">
+                    <PathIcon Data="{StaticResource IconTune}" Width="18" Height="18" />
+                    <Button.Flyout>
+                        <Flyout Placement="BottomEdgeAlignedRight">
+                            <StackPanel Spacing="6" MinWidth="220" Margin="4">
+                                <TextBlock Text="{l:Tr Lib_SortBy}" FontWeight="SemiBold" />
+                                <RadioButton GroupName="sort" IsChecked="{Binding SortByDate}" Content="{l:Tr Lib_SortDate}" />
+                                <RadioButton GroupName="sort" IsChecked="{Binding SortByName}" Content="{l:Tr Lib_SortName}" />
+                                <RadioButton GroupName="sort" IsChecked="{Binding SortByAuthor}" Content="{l:Tr Lib_SortAuthor}" />
+                                <ToggleSwitch IsChecked="{Binding SortDescending}" OnContent="{l:Tr Lib_Descending}" OffContent="{l:Tr Lib_Descending}" />
+                                <Separator Margin="0,4" />
+                                <TextBlock Text="{l:Tr Lib_SearchIn}" FontWeight="SemiBold" />
+                                <CheckBox IsChecked="{Binding MatchName}" Content="{l:Tr Lib_MatchName}" />
+                                <CheckBox IsChecked="{Binding MatchAuthor}" Content="{l:Tr Lib_MatchAuthor}" />
+                                <Separator Margin="0,4" />
+                                <Button Classes="outline" HorizontalAlignment="Stretch" Command="{Binding LoadCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <PathIcon Data="{StaticResource IconRefresh}" Width="16" Height="16" />
+                                        <TextBlock Text="{l:Tr Lib_Refresh}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="0" Margin="0,0,0,24">
+
+                <Border IsVisible="{Binding IsDemo}" Margin="16,0,16,12" Padding="12,8" CornerRadius="4"
+                        Background="{DynamicResource SurfaceAltBrush}"
+                        BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1">
+                    <TextBlock Text="{l:Tr Lib_DemoBanner}" TextWrapping="Wrap" FontSize="13" />
+                </Border>
+
+                <!-- Loading / error / empty states -->
+                <StackPanel IsVisible="{Binding IsLoading}" Margin="16,24" Spacing="8" MaxWidth="320">
+                    <ProgressBar IsIndeterminate="True" />
+                    <TextBlock Classes="muted" Text="{l:Tr Lib_Loading}" HorizontalAlignment="Center" />
+                </StackPanel>
+                <StackPanel IsVisible="{Binding HasError}" Margin="16,24" Spacing="12" HorizontalAlignment="Center" MaxWidth="420">
+                    <TextBlock Classes="error" Text="{Binding ErrorMessage}" TextAlignment="Center" />
+                    <Button Classes="primary" HorizontalAlignment="Center" Command="{Binding LoadCommand}" Content="{l:Tr Lib_Retry}" />
+                </StackPanel>
+                <TextBlock IsVisible="{Binding IsEmpty}" Classes="muted" Margin="16,32" HorizontalAlignment="Center"
+                           Text="{l:Tr Lib_Empty}" />
+
+                <!-- Recently viewed: horizontally scrolling gallery on a tinted band -->
+                <Border IsVisible="{Binding HasRecent}"
+                        Background="{DynamicResource SurfaceAltBrush}"
+                        BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,1"
+                        Padding="0,14,0,18" Margin="0,0,0,8">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto" Margin="16,0">
+                            <TextBlock Classes="h2" Text="{l:Tr Lib_RecentlyViewed}" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Classes="icon" Padding="8,4" Command="{Binding ClearRecentCommand}">
+                                <TextBlock Classes="muted" Text="{l:Tr Lib_Clear}" FontSize="13" />
+                            </Button>
+                        </Grid>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding Recent}" Margin="16,0,16,8">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="14" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LibraryItemViewModel">
+                                        <Button Classes="card" Width="240"
+                                                Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).OpenCommand}"
+                                                CommandParameter="{Binding}"
+                                                AutomationProperties.Name="{Binding Name}">
+                                            <StackPanel>
+                                                <Border Height="180" CornerRadius="5,5,0,0" ClipToBounds="True"
+                                                        Background="{Binding CoverBrush}"
+                                                        BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,0,0,1">
+                                                    <Panel>
+                                                        <TextBlock Text="{Binding Initials}" FontSize="56" FontWeight="Black"
+                                                                   Foreground="#E6FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        <Image Source="{Binding Cover}" Stretch="UniformToFill" />
+                                                    </Panel>
+                                                </Border>
+                                                <StackPanel Margin="12,10,12,12" Spacing="2">
+                                                    <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Author}" Classes="muted" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <!-- Everything -->
+                <StackPanel IsVisible="{Binding !IsLoading}" Margin="16,12,16,0" Spacing="12" MaxWidth="1200">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasItems}">
+                        <TextBlock Classes="h2" Text="{l:Tr Lib_AllItems}" />
+                        <TextBlock Classes="muted" Text="{Binding Items.Count, StringFormat='({0})'}" VerticalAlignment="Bottom" />
+                    </StackPanel>
+
+                    <TextBlock IsVisible="{Binding HasNoResults}" Classes="muted" Margin="0,16" Text="{l:Tr Lib_NoResults}" />
+
+                    <ItemsControl ItemsSource="{Binding Items}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <c:AdaptiveGrid MinItemWidth="150" Spacing="14" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LibraryItemViewModel">
+                                <Button Classes="card" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                        Command="{Binding $parent[ItemsControl].((vm:LibraryViewModel)DataContext).OpenCommand}"
+                                        CommandParameter="{Binding}"
+                                        AutomationProperties.Name="{Binding Name}">
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Top" Height="130" CornerRadius="5,5,0,0" ClipToBounds="True"
+                                                Background="{Binding CoverBrush}"
+                                                BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,0,0,1">
+                                            <Panel>
+                                                <TextBlock Text="{Binding Initials}" FontSize="36" FontWeight="Black"
+                                                           Foreground="#E6FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <Image Source="{Binding Cover}" Stretch="UniformToFill" />
+                                            </Panel>
+                                        </Border>
+                                        <StackPanel Margin="10,8,10,10" Spacing="2">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Author}" Classes="muted" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

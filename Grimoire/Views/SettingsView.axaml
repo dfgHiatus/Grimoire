@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Grimoire.ViewModels"
+             xmlns:l="using:Grimoire.Services"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="800"
+             x:Class="Grimoire.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <ScrollViewer>
+        <StackPanel MaxWidth="640" Margin="16,24,16,32" Spacing="16">
+            <TextBlock Classes="h1" Text="{l:Tr Nav_Settings}" />
+
+            <!-- Account -->
+            <Border Classes="section">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="h2" Text="{l:Tr Set_Account}" />
+                    <TextBlock Text="{Binding SignedInAs}" TextWrapping="Wrap" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Classes="muted" FontSize="13" Text="{l:Tr Set_LogoutHint}" TextWrapping="Wrap"
+                                   VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <Button Grid.Column="1" Classes="outline" Command="{Binding SignOutCommand}" Content="{l:Tr Set_Logout}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Appearance -->
+            <Border Classes="section">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="h2" Text="{l:Tr Set_Appearance}" />
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,12,Auto">
+                        <TextBlock Text="{l:Tr Set_Theme}" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="1" MinWidth="180" SelectedIndex="{Binding ThemeIndex}"
+                                  AutomationProperties.Name="{l:Tr Set_Theme}">
+                            <ComboBoxItem Content="{l:Tr Theme_System}" />
+                            <ComboBoxItem Content="{l:Tr Theme_Light}" />
+                            <ComboBoxItem Content="{l:Tr Theme_Dark}" />
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="2" Text="{l:Tr Set_Language}" VerticalAlignment="Center" />
+                        <ComboBox Grid.Row="2" Grid.Column="1" MinWidth="180"
+                                  ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                                  AutomationProperties.Name="{l:Tr Set_Language}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="l:LanguageOption">
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
